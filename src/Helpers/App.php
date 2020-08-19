@@ -1,2 +1,4 @@
 <?php
 
+namespace jiny\app;
+

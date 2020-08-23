@@ -38,34 +38,16 @@ class Boot extends MiddleWare\Chain
     private function paerser($r)
     {
         if ($name = $r->controllerName()) {         
-            /*   
-            $controller = $this->factory($name); // 컨트롤러 객체 생성            
-            $method = $r->method(); // 실행 메서드            
-            $this->params = $r->params(); // uri 파라미터
-            */
-            return $this->controller($name, $r);
-            
+            return $this->controller($name, $r);            
         } else {
             // 설정에 라이트 정보가 없는 경우
             if($type = $r->actionType()) {
-                return $this->typeAction($type, $r);
-    
+                return $this->typeAction($type, $r);    
             } else {
                 // 라우터 정보에 컨트롤러 이름 없음.
-                /*
-                $msg = " 컨트롤러 이름이 설정되어 있지 않습니다.";
-                // 기본값 404
-                $controller = new \Jiny\App\Error($msg);
-                $method = "main";
-                */
-
                 return $this->errorNoController();
-
-            }
-            
+            }            
         }
-
-        return $this->run($controller, $method);
     }
 
     private function errorNoController()

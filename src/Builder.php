@@ -4,6 +4,7 @@ namespace Jiny\App;
 
 class Builder
 {
+    /*
     protected $conf;
 
     public function __construct()
@@ -25,4 +26,5 @@ class Builder
             return $this->conf->$key;
         }
     }
+    */
 }

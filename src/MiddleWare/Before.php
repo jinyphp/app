@@ -9,8 +9,12 @@ class Before extends Chain
     public function __construct()
     {
         //echo __CLASS__."<br>";
-        $str = \file_get_contents("../config/site.json");
-        $this->site = \json_decode($str);
+        $path = "../config/site.json";
+        if(file_exists($path)) {
+            $str = \file_get_contents($path);
+            $this->site = \json_decode($str);
+        }
+        
     }
 
     public function execute($req, $res)
@@ -33,11 +37,10 @@ class Before extends Chain
                 $Theme = \jiny\theme()->setName($name)->setPath();
             }
 
-
-    
             // next chain
             return $this->Next->execute($req, $res);
         } 
     }
+
 
 }

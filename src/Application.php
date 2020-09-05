@@ -11,20 +11,31 @@ class Application
         // echo __CLASS__."<br>";
     }
 
-    public function main()
+    public function main($req, $res)
     {
-        // echo "main 호출<br>";
-        $req = \jiny\http\request();
-        $res = \jiny\http\response();
+        $this->middleware($req, $res);
+        $res->send();
+    }
 
+    /**
+     * 미들웨어 처리
+     */
+    private function middleware($req, $res)
+    {
         // 체인 목록
-        $chain = [
-            new Middleware\Before(),
-            new \App\MiddleWare\AppBefore(),
-            new \Jiny\App\Boot(),
-            new \App\MiddleWare\AppAfter(),
-            new Middleware\After()
+        $chain = [];
+        $list = [
+            "\Jiny\App\Middleware\Before",
+            "\App\MiddleWare\AppBefore",
+            "\Jiny\App\Boot",
+            "\App\MiddleWare\AppAfter",
+            "\Jiny\App\Middleware\After"
         ];
+        foreach ($list as $name) {
+            if($obj = $this->factory($name)) {
+                $chain []= $obj;
+            }
+        }
 
         // 체인 결합
         for($i=1; $i<count($chain); $i++) {
@@ -32,10 +43,18 @@ class Application
         }
 
         $chain[0]->execute($req, $res);
+    }
 
-        // end
-        // exit;
-        $res->send();
+    /**
+     * 미들웨어 객체 생성
+     */
+    private function factory($classname)
+    {
+        try {
+            return new $classname;
+        } catch (\Throwable $ex) {
+            return null; // 객체생성 실패
+        }
     }
 
     /**

@@ -5,22 +5,52 @@ namespace Jiny\App;
 class Boot extends MiddleWare\Chain
 {
     public $params=[];
-
+    private $route=null;
     public function __construct()
     {
         //echo __CLASS__."<br>";
+        // 라우터객체 생성 및 설정
+        $this->route = $this->routerFactory();
+    }
+
+    /**
+     * 라우터 객체를 생성하는 팩토리
+     */
+    private function routerFactory()
+    {
+        try {
+            // MiddleWare before에서 생성된 route 공유받음(싱글턴)
+            return \Jiny\Router\Route::instance();
+        } catch (\Throwable $ex) {
+            return null; // 객체생성 실패
+        }
     }
 
     public function execute($req, $res)
     {
-        // MiddleWare before에서 생성된 route 공유받음(싱글턴)
-        $r = \jiny\route()->main();
-        $res->body = $this->route($r); //jsonRoute
+        if ($this->route) {
+            if ($r = $this->route->main()) {
+                // 라우터 설정에 따른 컨트롤러 생성
+                $res->body = $this->route($r); //jsonRoute
+            } else {
+                // 라우터 정보가 없는 경우
+                echo "라우터 정보파일이 없습니다.";
+                exit;
+            }
+        } else {
+            // url 매칭
+        }
 
         // next chain
         return $this->Next->execute($req, $res);
     }
 
+    
+
+    
+    /**
+     * 라우터 정보에 의한 컨트롤러 생성
+     */
     private function route($r)
     {
         if($r->get()) { 
@@ -37,10 +67,11 @@ class Boot extends MiddleWare\Chain
      */
     private function paerser($r)
     {
-        if ($name = $r->controllerName()) {         
+        if ($name = $r->controllerName()) {
+            // 컨트롤러 생성     
             return $this->controller($name, $r);            
         } else {
-            // 설정에 라이트 정보가 없는 경우
+            // 설정에 라우터 정보가 없는 경우
             if($type = $r->actionType()) {
                 return $this->typeAction($type, $r);    
             } else {
@@ -118,21 +149,18 @@ class Boot extends MiddleWare\Chain
     }
 
     /**
-     * Simple Factory
      * 객체를 생성합니다.
      */
     private function factory($name, $args=null)
     {
         try {
             if($args) {
-                // echo "args";
                 $obj = new $name ($args);
             } else {
                 $obj = new $name;
             }
-        } catch (\Exception $e) {
-            echo "오류";
-            echo $e->getMessage();
+        } catch (\Throwable $ex) {
+            echo "컨트롤러 ".$name."을 생성할 수 없습니다.";
             exit;
         }
         return $obj;

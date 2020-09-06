@@ -93,13 +93,12 @@ class Boot extends MiddleWare\Chain
     }
 
 
+    
     private function controller($name, $r)
     {
-        $controller = $this->factory($name); // 컨트롤러 객체 생성            
+        $run = new Run($name);         
         $method = $r->method(); // 실행 메서드            
-        $this->params = $r->params(); // uri 파라미터
-
-        return $this->run($controller, $method);
+        return $run->setParam($r->params())->execute($method);
     }
 
     private function typeAction($type, $r)
@@ -151,8 +150,10 @@ class Boot extends MiddleWare\Chain
     /**
      * 객체를 생성합니다.
      */
+    /*
     private function factory($name, $args=null)
     {
+
         try {
             if($args) {
                 $obj = new $name ($args);
@@ -161,9 +162,12 @@ class Boot extends MiddleWare\Chain
             }
         } catch (\Throwable $ex) {
             echo "컨트롤러 ".$name."을 생성할 수 없습니다.";
+            // print_r($ex);
             exit;
         }
+
         return $obj;
     }
+    */
 
 }
